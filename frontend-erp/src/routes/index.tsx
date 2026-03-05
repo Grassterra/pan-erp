@@ -11,6 +11,8 @@ import { useAuth } from '../features/auth/AuthContext';
 import { LoginPage } from '../features/auth/LoginPage';
 import { SignupPage } from '../features/auth/SignupPage';
 import { StockListPage } from '../features/inventory/StockListPage';
+import { MasterDataPage } from '../features/master-data/MasterDataPage';
+import { ItemPage } from '../features/master-data/items/ItemPage';
 import { OcrPage } from '../features/ocr/OcrPage';
 import { SalesOrderListPage } from '../features/sales/SalesOrderListPage';
 
@@ -147,6 +149,8 @@ const router = createBrowserRouter([
       { path: 'sales', element: <SalesOrderListPage /> }, // 영업 관리
       { path: 'inventory', element: <StockListPage /> }, // 재고 관리
       { path: 'accounting', element: <JournalEntryListPage /> }, // 회계 관리
+      { path: 'master-data', element: <MasterDataPage /> }, // 마스터 데이터
+      { path: 'master-data/items', element: <ItemPage /> }, // 품목 마스터
       { path: 'ocr', element: <OcrPage /> }, // OCR 기능
     ],
   },

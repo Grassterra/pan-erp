@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
 
@@ -72,6 +73,27 @@ public class GlobalExceptionHandler {
 
                 ErrorResponse errorResponse = new ErrorResponse(
                                 ex.getErrorCode().getCode(),
+                                ex.getMessage(),
+                                request.getRequestURI());
+
+                return ResponseEntity
+                                .status(HttpStatus.NOT_FOUND)
+                                .body(ApiResponse.error(errorResponse, ex.getMessage()));
+        }
+
+        /**
+         * 스프링 정적 리소스/핸들러 미존재 예외 처리
+         *
+         * 매핑된 컨트롤러가 없는 경로로 요청이 들어왔을 때 발생할 수 있습니다.
+         * 내부 오류(500)로 보이지 않도록 404로 반환합니다.
+         */
+        @ExceptionHandler(NoResourceFoundException.class)
+        public ResponseEntity<ApiResponse<ErrorResponse>> handleNoResourceFoundException(
+                        NoResourceFoundException ex, HttpServletRequest request) {
+                log.error("No resource found: {}", ex.getMessage());
+
+                ErrorResponse errorResponse = new ErrorResponse(
+                                ErrorCode.RESOURCE_NOT_FOUND.getCode(),
                                 ex.getMessage(),
                                 request.getRequestURI());
 

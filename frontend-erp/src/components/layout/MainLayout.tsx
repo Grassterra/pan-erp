@@ -17,6 +17,8 @@ export function MainLayout() {
       '/sales': '수주 관리',
       '/inventory': '재고 관리',
       '/accounting': '회계 관리',
+      '/master-data': '마스터 데이터',
+      '/master-data/items': 'Item',
       '/ocr': 'OCR 추출',
     }[location.pathname] || 'Overview';
 

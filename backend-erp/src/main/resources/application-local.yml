@@ -5,13 +5,13 @@ spring:
         static: ap-southeast-3
 
   config:
-    import: "aws-parameterstore:/dev/erp_backend/"
+    import: "optional:aws-parameterstore:/dev/erp_backend/"
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/doosan
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://127.0.0.1:3306/doosan?allowPublicKeyRetrieval=true&useSSL=false&createDatabaseIfNotExist=true
+    username: root
+    password: 123456
     hikari:
       maximum-pool-size: 2
       minimum-idle: 1
@@ -57,9 +57,9 @@ logging:
 # AWS 설정
 aws:
   credentials:
-    access-key: ${AWS_ACCESS_KEY}
-    secret-key: ${AWS_SECRET_KEY}
-  region: ${AWS_REGION}
+    access-key: dummy_access_key
+    secret-key: dummy_secret_key
+  region: ap-southeast-3
   textract-region: ap-southeast-1
 
 # 파일 업로드 설정
