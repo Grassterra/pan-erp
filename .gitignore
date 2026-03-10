@@ -1,0 +1,2 @@
+# Local-only configuration
+/backend-erp/src/main/resources/application-local.yml
