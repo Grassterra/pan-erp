@@ -28,6 +28,7 @@ public class AuthService {
     private final UserRepository userRepository;      // 사용자 데이터 접근
     private final PasswordEncoder passwordEncoder;   // 비밀번호 암호화
     private final JwtTokenProvider jwtTokenProvider; // JWT 토큰 생성
+    private final ActivityLogService activityLogService; // 활동 로그 서비스
 
     /**
      * 회원가입 처리
@@ -64,6 +65,7 @@ public class AuthService {
      * 1. 사용자 조회
      * 2. 비밀번호 검증
      * 3. JWT 토큰 생성 및 반환
+     * 4. 로그인 활동 기록
      *
      * @param request 로그인 요청 DTO
      * @return JWT 토큰 정보
@@ -72,15 +74,38 @@ public class AuthService {
     public LoginResponse login(LoginRequest request) {
         // 사용자 조회 (없으면 예외)
         User user = userRepository.findByUserId(request.getUserId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
+                .orElse(null);
+
+        if (user == null) {
+            // 로그인 실패 기록 (사용자 없음)
+            activityLogService.logLoginFailed(request.getUserId());
+            throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
+        }
 
         // 비밀번호 검증 (불일치 시 예외)
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            // 로그인 실패 기록 (비밀번호 불일치)
+            activityLogService.logLoginFailed(request.getUserId());
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
+
+        // 로그인 성공 기록
+        activityLogService.logLogin(user.getId(), user.getName(), user.getUserId());
 
         // JWT 토큰 생성 후 반환
         String token = jwtTokenProvider.createToken(user.getUserId(), user.getRole().name());
         return LoginResponse.of(token, jwtTokenProvider.getExpiration() / 1000, user);
+    }
+
+    /**
+     * 로그아웃 기록
+     * 
+     * @param userId 사용자 ID
+     */
+    public void logout(String userId) {
+        User user = userRepository.findByUserId(userId).orElse(null);
+        if (user != null) {
+            activityLogService.logLogout(user.getId(), user.getName(), user.getUserId());
+        }
     }
 }

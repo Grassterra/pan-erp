@@ -54,6 +54,7 @@ public class DataLoader implements CommandLineRunner {
             {"master-data", "마스터 데이터", "Master Data", "/master-data", "5"},
             {"ocr", "OCR 추출", "OCR Extraction", "/ocr", "6"},
             {"users", "사용자 관리", "User Management", "/users", "7"},
+            {"activity-logs", "활동 로그", "Activity Logs", "/activity-logs", "8"},
         };
 
         for (String[] m : moduleData) {

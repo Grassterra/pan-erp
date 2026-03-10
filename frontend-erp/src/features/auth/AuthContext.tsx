@@ -5,6 +5,7 @@
  */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+import { client } from '../../api/client';
 import type { User } from '../../types';
 import { authApi, type LoginRequest, type SignupRequest, type ModulePermission } from './api';
 
@@ -186,13 +187,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // 로그아웃 처리
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('permissions');
-    setUser(null);
-    setPermissions([]);
-    window.location.href = '/login'; // 페이지 새로고침을 통해 상태 완전히 초기화
+  const logout = async () => {
+    try {
+      // 서버에 로그아웃 기록
+      const token = localStorage.getItem('token');
+      if (token) {
+        await client.post('/api/auth/logout');
+      }
+    } catch (e) {
+      console.error('Failed to log logout', e);
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('permissions');
+      setUser(null);
+      setPermissions([]);
+      window.location.href = '/login'; // 페이지 새로고침을 통해 상태 완전히 초기화
+    }
   };
 
   // 모듈 조회 권한 확인
