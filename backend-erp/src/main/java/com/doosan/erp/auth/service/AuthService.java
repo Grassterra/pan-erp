@@ -81,6 +81,6 @@ public class AuthService {
 
         // JWT 토큰 생성 후 반환
         String token = jwtTokenProvider.createToken(user.getUserId(), user.getRole().name());
-        return LoginResponse.of(token, jwtTokenProvider.getExpiration() / 1000);
+        return LoginResponse.of(token, jwtTokenProvider.getExpiration() / 1000, user);
     }
 }

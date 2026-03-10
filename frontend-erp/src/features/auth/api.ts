@@ -11,11 +11,23 @@ export interface LoginRequest {
   password: string;
 }
 
+// 로그인 응답 사용자 정보
+export interface LoginUserInfo {
+  id: number;
+  userId: string;
+  name: string;
+  email?: string;
+  role: string;
+  userLevel?: string;
+  userLevelCode?: string;
+}
+
 // 로그인 응답 데이터 구조
 export interface LoginResponse {
   accessToken: string; // JWT 접근 토큰
   tokenType: string; // 토큰 타입 (보통 Bearer)
   expiresIn: number; // 만료 시간
+  user?: LoginUserInfo; // 사용자 정보
 }
 
 // 회원가입 요청 데이터 구조
@@ -23,6 +35,19 @@ export interface SignupRequest {
   userId: string;
   name: string;
   password: string;
+}
+
+// 모듈 권한 정보
+export interface ModulePermission {
+  moduleCode: string;
+  moduleName: string;
+  routePrefix: string;
+  canView: boolean;
+  canCreate: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+  canExport: boolean;
+  canPrint: boolean;
 }
 
 // 인증 관련 API 함수 모음
@@ -41,6 +66,14 @@ export const authApi = {
    */
   signup: async (data: SignupRequest) => {
     const response = await client.post<ApiResponse<number>>('/api/auth/signup', data);
+    return response.data;
+  },
+
+  /**
+   * 현재 로그인한 사용자의 모듈 권한을 가져옵니다.
+   */
+  getMyPermissions: async (): Promise<ModulePermission[]> => {
+    const response = await client.get<ModulePermission[]>('/api/v1/permissions/me');
     return response.data;
   },
 

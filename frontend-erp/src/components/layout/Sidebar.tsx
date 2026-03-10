@@ -3,24 +3,28 @@
  * @description 애플리케이션의 사이드바 네비게이션 컴포넌트입니다.
  * 주요 페이지로 이동하는 링크 목록과 현재 로그인한 사용자 정보를 표시합니다.
  */
-import { Database, FileText, LayoutDashboard, LogOut, Package, ScanLine, ShoppingCart, User } from 'lucide-react';
+import { Database, FileText, LayoutDashboard, LogOut, Package, ScanLine, ShoppingCart, User, Users } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 import { useAuth } from '../../features/auth/AuthContext';
 import { cn } from '../../lib/utils';
 
-// 네비게이션 메뉴 항목 정의
+// 네비게이션 메뉴 항목 정의 (moduleCode는 백엔드의 모듈 코드와 일치해야 함)
 const navigation = [
-  { name: '대시보드', href: '/', icon: LayoutDashboard },
-  { name: '수주 관리', href: '/sales', icon: ShoppingCart },
-  { name: '재고 관리', href: '/inventory', icon: Package },
-  { name: '회계 관리', href: '/accounting', icon: FileText },
-  { name: '마스터 데이터', href: '/master-data', icon: Database },
-  { name: 'OCR 추출', href: '/ocr', icon: ScanLine },
+  { name: '대시보드', href: '/', icon: LayoutDashboard, moduleCode: 'dashboard' },
+  { name: '수주 관리', href: '/sales', icon: ShoppingCart, moduleCode: 'sales' },
+  { name: '재고 관리', href: '/inventory', icon: Package, moduleCode: 'inventory' },
+  { name: '회계 관리', href: '/accounting', icon: FileText, moduleCode: 'accounting' },
+  { name: '마스터 데이터', href: '/master-data', icon: Database, moduleCode: 'master-data' },
+  { name: 'OCR 추출', href: '/ocr', icon: ScanLine, moduleCode: 'ocr' },
+  { name: '사용자 관리', href: '/users', icon: Users, moduleCode: 'users' },
 ];
 
 export function Sidebar() {
-  const { logout, user } = useAuth(); // 인증 컨텍스트에서 로그아웃 함수와 유저 정보 사용
+  const { logout, user, canView } = useAuth(); // 인증 컨텍스트에서 로그아웃 함수와 유저 정보 사용
+
+  // 권한에 따라 네비게이션 필터링
+  const filteredNavigation = navigation.filter(item => canView(item.moduleCode));
 
   return (
     <div className='flex w-72 flex-col bg-slate-900 border-r border-slate-800 h-screen fixed left-0 top-0 z-30 shadow-2xl transition-all duration-300'>
@@ -36,7 +40,7 @@ export function Sidebar() {
 
       {/* 2. 네비게이션 메뉴 */}
       <nav className='flex-1 space-y-2 px-4 py-8'>
-        {navigation.map((item) => (
+        {filteredNavigation.map((item) => (
           <NavLink
             key={item.name}
             to={item.href}
@@ -76,7 +80,7 @@ export function Sidebar() {
             </div>
             <div className='ml-3 min-w-0'>
               <p className='text-sm font-semibold text-white truncate'>{user?.name || 'User'}</p>
-              <p className='text-xs text-slate-400 truncate'>Administrator</p>
+              <p className='text-xs text-slate-400 truncate'>{user?.userLevel || 'User'}</p>
             </div>
           </div>
           <button

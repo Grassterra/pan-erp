@@ -1,5 +1,6 @@
 package com.doosan.erp.auth.dto;
 
+import com.doosan.erp.auth.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,19 +21,41 @@ public class LoginResponse {
     private String accessToken;  // JWT 토큰
     private String tokenType;    // 토큰 타입 (Bearer)
     private Long expiresIn;      // 만료 시간 (초)
+    private UserInfo user;       // 사용자 정보
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    public static class UserInfo {
+        private Long id;
+        private String userId;
+        private String name;
+        private String email;
+        private String role;
+        private String userLevel;      // User level name
+        private String userLevelCode;  // User level code
+    }
 
     /**
      * LoginResponse 생성 팩토리 메서드
-     *
-     * @param accessToken JWT 토큰 문자열
-     * @param expiresIn 만료 시간 (초 단위)
-     * @return LoginResponse 객체
      */
-    public static LoginResponse of(String accessToken, Long expiresIn) {
+    public static LoginResponse of(String accessToken, Long expiresIn, User user) {
+        String userLevelName = user.getUserLevel() != null ? user.getUserLevel().getName() : "User";
+        String userLevelCode = user.getUserLevel() != null ? user.getUserLevel().getCode() : "user";
+        
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .tokenType("Bearer")
                 .expiresIn(expiresIn)
+                .user(UserInfo.builder()
+                        .id(user.getId())
+                        .userId(user.getUserId())
+                        .name(user.getName())
+                        .email(user.getEmail())
+                        .role(user.getRole().name())
+                        .userLevel(userLevelName)
+                        .userLevelCode(userLevelCode)
+                        .build())
                 .build();
     }
 }

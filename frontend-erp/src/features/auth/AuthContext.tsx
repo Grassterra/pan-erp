@@ -3,19 +3,21 @@
  * @description 전역 인증 상태(로그인 여부, 사용자 정보)를 관리하는 Context Provider입니다.
  * JWT 토큰 기반 인증 로직과 로그인/회원가입/로그아웃 기능을 제공합니다.
  */
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 import type { User } from '../../types';
-import { authApi, type LoginRequest, type SignupRequest } from './api';
+import { authApi, type LoginRequest, type SignupRequest, type ModulePermission } from './api';
 
 // 인증 컨텍스트 타입 정의
 interface AuthContextType {
   user: User | null; // 현재 로그인한 사용자 정보
+  permissions: ModulePermission[]; // 사용자 모듈 권한
   isAuthenticated: boolean; // 로그인 여부 (user가 있으면 true)
   login: (data: LoginRequest) => Promise<void>; // 로그인 함수
   signup: (data: SignupRequest) => Promise<void>; // 회원가입 함수
   logout: () => void; // 로그아웃 함수
   isLoading: boolean; // API 요청 진행 중 여부
+  canView: (moduleCode: string) => boolean; // 모듈 조회 권한 확인
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -81,6 +83,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null;
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [permissions, setPermissions] = useState<ModulePermission[]>(() => {
+    const storedPerms = localStorage.getItem('permissions');
+    if (storedPerms) {
+      try {
+        return JSON.parse(storedPerms);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  // 기존 로그인 사용자의 권한 자동 로드
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      if (user && permissions.length === 0) {
+        try {
+          const perms = await authApi.getMyPermissions();
+          localStorage.setItem('permissions', JSON.stringify(perms));
+          setPermissions(perms);
+        } catch (e) {
+          console.error('Failed to fetch permissions', e);
+        }
+      }
+    };
+    fetchPermissions();
+  }, [user]);
 
   // 회원가입 처리
   const signup = async (data: SignupRequest) => {
@@ -111,21 +140,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await authApi.login(data);
       if (response.success) {
-        const { accessToken } = response.data;
+        const { accessToken, user: userData } = response.data;
         // 토큰 로컬 스토리지 저장
         localStorage.setItem('token', accessToken);
 
-        // 사용자 정보 생성 (JWT 디코딩 대신 간단히 요청 ID 사용 예시)
+        // 사용자 정보 설정 (서버에서 받은 데이터 사용)
         const userToSet: User = {
-          id: 0,
-          userId: data.userId,
-          name: data.userId,
-          role: 'USER',
+          id: userData?.id || 0,
+          userId: userData?.userId || data.userId,
+          name: userData?.name || data.userId,
+          email: userData?.email,
+          role: (userData?.role as 'USER' | 'ADMIN') || 'USER',
+          userLevel: userData?.userLevel,
+          userLevelCode: userData?.userLevelCode,
         };
 
         // 사용자 정보 로컬 스토리지 저장 및 상태 업데이트
         localStorage.setItem('user', JSON.stringify(userToSet));
         setUser(userToSet);
+
+        // 사용자 권한 정보 가져오기
+        try {
+          const perms = await authApi.getMyPermissions();
+          localStorage.setItem('permissions', JSON.stringify(perms));
+          setPermissions(perms);
+        } catch (e) {
+          console.error('Failed to fetch permissions', e);
+        }
       } else {
         throw new Error(response.error?.message || 'Login failed');
       }
@@ -148,12 +189,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('permissions');
     setUser(null);
+    setPermissions([]);
     window.location.href = '/login'; // 페이지 새로고침을 통해 상태 완전히 초기화
   };
 
+  // 모듈 조회 권한 확인
+  const canView = (moduleCode: string): boolean => {
+    // Admin role은 항상 접근 가능
+    if (user?.role === 'ADMIN' || user?.userLevelCode === 'admin') {
+      return true;
+    }
+    // 권한 정보가 아직 로드되지 않았으면 모두 표시 (fallback)
+    if (permissions.length === 0) {
+      return true;
+    }
+    const perm = permissions.find(p => p.moduleCode === moduleCode);
+    return perm?.canView ?? false;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, signup, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, permissions, isAuthenticated: !!user, login, signup, logout, isLoading, canView }}>
       {children}
     </AuthContext.Provider>
   );

@@ -15,6 +15,14 @@ import { MasterDataPage } from '../features/master-data/MasterDataPage';
 import { ItemPage } from '../features/master-data/items/ItemPage';
 import { OcrPage } from '../features/ocr/OcrPage';
 import { SalesOrderListPage } from '../features/sales/SalesOrderListPage';
+import {
+  UserListPage,
+  UserFormPage,
+  UserLevelListPage,
+  UserLevelFormPage,
+  UserLevelPermissionsPage,
+  ModuleListPage,
+} from '../features/users';
 
 /**
  * 보호된 라우트 (Protected Route) 래퍼 컴포넌트
@@ -152,6 +160,14 @@ const router = createBrowserRouter([
       { path: 'master-data', element: <MasterDataPage /> }, // 마스터 데이터
       { path: 'master-data/items', element: <ItemPage /> }, // 품목 마스터
       { path: 'ocr', element: <OcrPage /> }, // OCR 기능
+      { path: 'users', element: <UserListPage /> }, // 사용자 관리
+      { path: 'users/new', element: <UserFormPage /> }, // 사용자 추가
+      { path: 'users/:id/edit', element: <UserFormPage /> }, // 사용자 수정
+      { path: 'users/levels', element: <UserLevelListPage /> }, // 사용자 레벨
+      { path: 'users/levels/new', element: <UserLevelFormPage /> }, // 레벨 추가
+      { path: 'users/levels/:id/edit', element: <UserLevelFormPage /> }, // 레벨 수정
+      { path: 'users/levels/:id/permissions', element: <UserLevelPermissionsPage /> }, // 레벨 권한
+      { path: 'users/modules', element: <ModuleListPage /> }, // 모듈 관리
     ],
   },
   {

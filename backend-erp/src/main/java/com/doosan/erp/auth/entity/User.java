@@ -1,6 +1,7 @@
 package com.doosan.erp.auth.entity;
 
 import com.doosan.erp.common.entity.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,8 +26,13 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true, length = 50)
     private String userId;
 
+    // 이메일 주소
+    @Column(unique = true, length = 100)
+    private String email;
+
     // 암호화된 비밀번호 (BCrypt)
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     // 사용자 이름
@@ -38,6 +44,28 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 20)
     @Builder.Default
     private Role role = Role.USER;
+
+    // 사용자 레벨 (권한 그룹)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_level_id")
+    private UserLevel userLevel;
+
+    // 활성화 상태
+    @Column(name = "is_active")
+    @Builder.Default
+    private Boolean isActive = true;
+
+    // 전화번호
+    @Column(length = 20)
+    private String phone;
+
+    // 부서
+    @Column(length = 50)
+    private String department;
+
+    // 직위
+    @Column(length = 50)
+    private String position;
 
     /**
      * 사용자 권한 열거형

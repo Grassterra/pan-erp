@@ -24,5 +24,8 @@ export interface User {
   id: number;
   userId: string;
   name: string;
+  email?: string;
   role: 'USER' | 'ADMIN'; // 사용자 권한 역할
+  userLevel?: string;     // User level name (e.g., "Administrator", "Staff")
+  userLevelCode?: string; // User level code (e.g., "admin", "staff")
 }
