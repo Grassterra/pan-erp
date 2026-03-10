@@ -23,6 +23,7 @@ import {
   UserLevelPermissionsPage,
   ModuleListPage,
 } from '../features/users';
+import { ActivityLogPage } from '../features/activity-logs';
 
 /**
  * 보호된 라우트 (Protected Route) 래퍼 컴포넌트
@@ -168,6 +169,7 @@ const router = createBrowserRouter([
       { path: 'users/levels/:id/edit', element: <UserLevelFormPage /> }, // 레벨 수정
       { path: 'users/levels/:id/permissions', element: <UserLevelPermissionsPage /> }, // 레벨 권한
       { path: 'users/modules', element: <ModuleListPage /> }, // 모듈 관리
+      { path: 'activity-logs', element: <ActivityLogPage /> }, // 활동 로그
     ],
   },
   {

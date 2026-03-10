@@ -4,6 +4,7 @@ import com.doosan.erp.auth.entity.User;
 import com.doosan.erp.auth.entity.UserLevel;
 import com.doosan.erp.auth.repository.UserLevelRepository;
 import com.doosan.erp.auth.repository.UserRepository;
+import com.doosan.erp.auth.service.ActivityLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +24,7 @@ public class UserManagementController {
     private final UserRepository userRepository;
     private final UserLevelRepository userLevelRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ActivityLogService activityLogService;
 
     @GetMapping
     public ResponseEntity<Page<User>> getAll(
@@ -76,6 +78,10 @@ public class UserManagementController {
         }
         
         User saved = userRepository.save(user);
+        
+        // Log create activity
+        activityLogService.logCreate("User", saved.getId(), saved.getUserId(), "Users");
+        
         return ResponseEntity.ok(saved);
     }
 
@@ -100,6 +106,10 @@ public class UserManagementController {
                     }
                     
                     User saved = userRepository.save(existing);
+                    
+                    // Log update activity
+                    activityLogService.logUpdate("User", saved.getId(), saved.getUserId(), "Users", "name,email,userLevel");
+                    
                     return ResponseEntity.ok(saved);
                 })
                 .orElse(ResponseEntity.notFound().build());
@@ -140,7 +150,12 @@ public class UserManagementController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         return userRepository.findById(id)
                 .map(user -> {
+                    String userId = user.getUserId();
                     userRepository.delete(user);
+                    
+                    // Log delete activity
+                    activityLogService.logDelete("User", id, userId, "Users");
+                    
                     return ResponseEntity.noContent().<Void>build();
                 })
                 .orElse(ResponseEntity.notFound().build());

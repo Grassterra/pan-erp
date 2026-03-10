@@ -3,7 +3,7 @@
  * @description 애플리케이션의 사이드바 네비게이션 컴포넌트입니다.
  * 주요 페이지로 이동하는 링크 목록과 현재 로그인한 사용자 정보를 표시합니다.
  */
-import { Database, FileText, LayoutDashboard, LogOut, Package, ScanLine, ShoppingCart, User, Users } from 'lucide-react';
+import { Activity, Database, FileText, LayoutDashboard, LogOut, Package, ScanLine, ShoppingCart, User, Users } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 import { useAuth } from '../../features/auth/AuthContext';
@@ -18,6 +18,7 @@ const navigation = [
   { name: '마스터 데이터', href: '/master-data', icon: Database, moduleCode: 'master-data' },
   { name: 'OCR 추출', href: '/ocr', icon: ScanLine, moduleCode: 'ocr' },
   { name: '사용자 관리', href: '/users', icon: Users, moduleCode: 'users' },
+  { name: '활동 로그', href: '/activity-logs', icon: Activity, moduleCode: 'activity-logs' },
 ];
 
 export function Sidebar() {

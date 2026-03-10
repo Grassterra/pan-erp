@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,5 +67,23 @@ public class AuthController {
     public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    /**
+     * 로그아웃 API
+     *
+     * 로그아웃 활동을 기록합니다.
+     * JWT는 stateless이므로 실제 토큰 무효화는 클라이언트에서 처리합니다.
+     *
+     * @param principal 현재 인증된 사용자 정보
+     * @return 성공 응답
+     */
+    @Operation(summary = "로그아웃", description = "로그아웃 활동을 기록합니다")
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<String>> logout(@AuthenticationPrincipal UserDetails principal) {
+        if (principal != null) {
+            authService.logout(principal.getUsername());
+        }
+        return ResponseEntity.ok(ApiResponse.success("Logged out successfully"));
     }
 }
