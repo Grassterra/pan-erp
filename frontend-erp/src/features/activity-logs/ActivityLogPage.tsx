@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Filter, Clock, User, FileText, ChevronLeft, ChevronRight, Calendar, X } from 'lucide-react';
 import { client } from '../../api/client';
@@ -275,7 +275,7 @@ export default function ActivityLogPage() {
   }, [filteredData, currentPage, pageSize]);
 
   // reset page when filters or page size change
-  useMemo(() => {
+  useEffect(() => {
     setCurrentPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, entityType, module, action, startDate, endDate, pageSize]);

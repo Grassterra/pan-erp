@@ -4,7 +4,7 @@
  * React Portals를 사용하여 document.body 하위에 렌더링됩니다.
  */
 import { X } from 'lucide-react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 
 interface ModalProps {
@@ -15,6 +15,21 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+  const portalContainer = useMemo(() => {
+    const el = document.createElement('div');
+    el.setAttribute('data-modal-root', '');
+    return el;
+  }, []);
+
+  useEffect(() => {
+    document.body.appendChild(portalContainer);
+    return () => {
+      if (portalContainer.parentNode) {
+        portalContainer.parentNode.removeChild(portalContainer);
+      }
+    };
+  }, [portalContainer]);
+
   // 모달이 열려있을 때 배경 스크롤 방지
   useEffect(() => {
     if (isOpen) {
@@ -53,6 +68,6 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         <div className='flex-1 overflow-y-auto p-6'>{children}</div>
       </div>
     </div>,
-    document.body,
+    portalContainer,
   );
 }
